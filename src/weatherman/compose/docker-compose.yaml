@@ -1,0 +1,25 @@
+services:
+  collector:
+    image: utodorovic/weatherman-collector:latest
+    container_name: collector
+    environment:
+      DATABASE_URL: 'sqlite:////opt/db/data.db'
+      WEATHER_API_KEY: weather-api-key
+    volumes:
+      - "${HOME}/db:/opt/db"
+  api:
+    image: utodorovic/weatherman-api:latest
+    restart: always
+    depends_on:
+      collector:
+        condition: service_started
+    volumes:
+      - "${HOME}/db:/opt/db:RO"
+    container_name: api
+    environment:
+      DATABASE_URL: 'sqlite:////opt/db/data.db'
+      API_SECRET_KEY: api-secret-key
+      DEFAULT_ADMIN_PASSWORD: default-admin-password
+      AUTH_DATABASE_URL: 'sqlite:////opt/db/auth.db'
+    ports:
+      - 5000:5000
