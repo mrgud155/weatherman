@@ -1,5 +1,5 @@
 import httpx
-from sqlalchemy import Select
+from sqlalchemy import Select, and_
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlmodel import Session
 
@@ -59,17 +59,18 @@ def save_orm_from_json(json_data):
         db.add(location)
         db.commit()
         logger.debug(f"Location {location.name} added to database")
-    except IntegrityError as e:
-        logging.debug(f"Failed to save data to database, exception: {e}")
+    except IntegrityError:
+        logging.debug(f"Skipping saving location to database, data already exists")
         db.rollback()
         logger.debug(f"Location {location.name} already exists in database, retrieving")
-        select = (
-            Select(Location)
-            .where(Location.name == location.name)
-            .where(Location.region == location.region)
-            .where(Location.country == location.country)
+        lc_select = Select(Location).where(
+            and_(
+                Location.name == location.name,
+                Location.region == location.region,
+                Location.country == location.country,
+            )
         )
-        location = db.exec(select).one_or_none()[0]
+        location = db.exec(lc_select).one_or_none()[0]
 
     # Create Condition instance for current weather
     current_condition_data = data["current"]["condition"]
@@ -114,7 +115,9 @@ def save_orm_from_json(json_data):
         db.commit()
         logging.debug(f"Current weather data added to database")
     except SQLAlchemyError as e:
-        logger.debug(f"Failed to save data to database: {e}")
+        logger.debug(
+            f"Skipping saving current weather data to database, data already exists"
+        )
         db.rollback()
 
     # Create Forecast instance
@@ -128,12 +131,12 @@ def save_orm_from_json(json_data):
         db.add(forecast)
         db.commit()
     except IntegrityError:
-        logger.debug(
-            f"Failed to save forecast data to database due to IntegrityError - data already exists"
-        )
+        logger.debug(f"Skipping saving forecast data to database, data already exists")
         db.rollback()
-        select = Select(Forecast).where(Forecast.date == forecast.date)
-        forecast = db.exec(select).one_or_none()[0]
+        fc_select = Select(Forecast).where(
+            and_(Forecast.location_id == location.id, Forecast.date == forecast.date)
+        )
+        forecast = db.exec(fc_select).one_or_none()[0]
 
     # Create Daily instance
     daily_data = forecast_data["day"]

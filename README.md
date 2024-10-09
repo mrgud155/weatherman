@@ -14,6 +14,13 @@ Weatherman consists of two components:
   openssl rand -hex 32
   ```
 - Default admin password for the API, which will be used to create the first `admin` user
+- You can optionally create a file which will contain the cities for which you want to fetch weather data. The file should contain one city name per line and one interval in minutes, comma-separated. If you don't provide this file, the collector will fetch weather data for a default set of cities, which can be seen in [constants.py](src/weatherman/collector/constants.py) file. Filename needs to be provided as an environment variable `LOCATION_FILE` when running the collector. Example file:
+```text
+Moscow,10
+Berlin,5
+Belgrade,15
+Rome,5
+```
 
 ### Docker
 Weatherman is automatically built and deployed to Docker Hub on every push to the main branch. To run Weatherman using Docker, follow these steps.
