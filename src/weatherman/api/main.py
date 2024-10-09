@@ -6,7 +6,7 @@ from sqlalchemy import inspect
 
 import src.weatherman.api.auth as auth
 import src.weatherman.api.weather as weather
-from src.weatherman.api.database import Base, engine, get_auth_db
+from src.weatherman.api.database import Base, weather_engine, engine, get_auth_db
 from src.weatherman.api.authschemas import UserSchema
 
 logging.basicConfig(level=logging.DEBUG)
@@ -17,7 +17,7 @@ app.include_router(auth.router)
 app.include_router(weather.router)
 
 # check whether the table structure is present in the database
-logger.debug(f"Checking for table structure in database: {engine.url}")
+logger.debug(f"Checking for auth table structure in database: {engine.url}")
 if not inspect(engine).has_table(engine, "users"):
     logger.info("Auth tables not found, creating table structure")
     Base.metadata.create_all(engine)
@@ -39,3 +39,7 @@ if not db.query(UserSchema).count():
     )
     db.add(user)
     db.commit()
+
+if not inspect(weather_engine).has_table(weather_engine, "location"):
+    logger.error("Weather tables not found, exiting!")
+    exit(1)
