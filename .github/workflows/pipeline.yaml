@@ -10,9 +10,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - dockerfile: ./src/weatherman/Dockerfile-collector
+          - dockerfile: src/weatherman/Dockerfile-collector
             image: utodorovic/weatherman-collector
-          - dockerfile: ./src/weatherman/Dockerfile-api
+          - dockerfile: src/weatherman/Dockerfile-api
             image: utodorovic/weatherman-api
     permissions:
       contents: read
@@ -34,7 +34,7 @@ jobs:
       - name: Build and push Docker images for Weatherman
         uses: docker/build-push-action@v5
         with:
-          context: ./src/weatherman
+          context: src/weatherman
           file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ matrix.image }}:latest
