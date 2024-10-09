@@ -42,7 +42,7 @@ Run the API:
 
 Open your browser and navigate to `http://localhost:5000/docs` to view the API documentation.
 
-You can also use the provided docker-compose file to run both components together:
+You can also use the provided [docker-compose file](src/weatherman/compose/docker-compose.yaml) to run both components together:
 ```sh
   docker-compose up -d
 ```
