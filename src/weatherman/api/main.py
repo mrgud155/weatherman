@@ -40,6 +40,6 @@ if not db.query(UserSchema).count():
     db.add(user)
     db.commit()
 
-if not inspect(weather_engine).has_table(weather_engine, "location"):
+if not inspect(weather_engine).has_table("location"):
     logger.error("Weather tables not found, exiting!")
     exit(1)
