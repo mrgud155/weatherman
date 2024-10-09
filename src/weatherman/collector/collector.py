@@ -4,6 +4,7 @@ from apscheduler import AsyncScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from asyncio import run
 
+from sqlalchemy import inspect
 from sqlmodel import SQLModel
 from src.weatherman.db import engine
 from src.weatherman.ormodels import Location, CurrentWeather, Condition, Forecast
@@ -26,9 +27,13 @@ async def main():
     logger = logging.getLogger(__name__)
     logger.addHandler(logging.StreamHandler())
     key = os.getenv("WEATHER_API_KEY")
+    if not key:
+        logger.error("No API key found. Exiting.")
+        exit(1)
     weather = WeatherApi(key)
-    logging.debug("Creating tables")
-    SQLModel.metadata.create_all(engine)
+    logging.debug("Checking if tables are present and creating tables")
+    if not inspect(engine).has_table(engine, "location"):
+        SQLModel.metadata.create_all(engine)
     async with AsyncScheduler() as scheduler:
         await scheduler.add_schedule(
             weather.fetch_and_save_weather,
