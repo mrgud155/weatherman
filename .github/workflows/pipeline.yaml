@@ -34,7 +34,7 @@ jobs:
       - name: Build and push Docker images for Weatherman
         uses: docker/build-push-action@v5
         with:
-          context: src/weatherman
+          context: src/weatherman/
           file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ matrix.image }}:latest
